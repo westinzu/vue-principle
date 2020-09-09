@@ -1,7 +1,7 @@
 /** TODO: 主入口,一个引入一个闭环 */
 import { initState } from './observe'
 import Watcher from './observe/watcher'
-import { compiler, util } from './util'
+import { compiler } from './util'
 
 /** 1.开始写vue构造函数 */
 function Vue (options) {
@@ -18,9 +18,7 @@ Vue.prototype._init = function (options) {
 
   /** 3.对钩子数据函数: data computed watch 拦截并初始化 */
   initState(vm)
-  // ....
   // 初始化工作 vue1.0 =>
-
   if (vm.$options.el) {
     vm.$mount()
   }
@@ -48,7 +46,7 @@ Vue.prototype._update = function () {
   let node = document.createDocumentFragment()
   let firstChild
   /** 每次拿到第一个元素就将这个元素放入到文档碎片中 */
-  while (firstChild = el.firstChild) {
+  while (firstChild === el.firstChild) {
     /** 对虚拟DOM添加子节点 */
     node.appendChild(firstChild)
   }
@@ -67,7 +65,7 @@ Vue.prototype.$mount = function () {
   let el = vm.$options.el
   /** 获取当前挂载的节点 vm.$el就是我要挂载的一个元素 */
   el = vm.$el = query(el)
-
+  console.log('el', el)
   /**
    * 渲染时通过 watcher来渲染的
    * 渲染watcher  用于渲染的watcher
@@ -82,6 +80,14 @@ Vue.prototype.$mount = function () {
    * 渲染watcher，默认会调用updateComponent这个方法
    * 我需要让每个数据 它更改了 需要重新的渲染
    *  */
-  new Watcher(vm, updateComponent)
+  return new Watcher(vm, updateComponent)
 }
+
+Vue.prototype.$watch = function (expr, handler, opts) {
+  /**  原理 创建一个watcher */
+  let vm = this
+  /** 用户自己定义的watch */
+  return new Watcher(vm, expr, handler, { user: true, ...opts })
+}
+
 export default Vue

@@ -7,7 +7,7 @@ import Vue from 'vue'
 let vm = new Vue({
   /** 表示要渲染的元素是app */
   el: '#app',
-  /** 有一个实例的data是对象,咱们要拦截他 */
+  /** 通过咱方法生成了一个实例, 需要拦截他的HTML,data和function */
   data () {
     return {
       msg: 'hello',
@@ -16,7 +16,6 @@ let vm = new Vue({
     }
   },
   computed: {
-
   },
   watch: {
 

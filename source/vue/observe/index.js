@@ -1,6 +1,8 @@
 /**
  * ? 个文件形成一个闭环1 */
 import Observer from './observer'
+import Watcher from './watcher'
+import Dep from './dep'
 /** 1.挟持 data computed watch 进行具体修改 */
 export function initState (vm) {
   /** 拿到新的入参实例 */
@@ -58,9 +60,66 @@ function initData (vm) {
 
 /**
  * ? 新的一篇章2 */
-function initComputed () {
 
+function createComputedGetter (vm, key) {
+  /** 这个watcher 就是我们定义的计算属性watcher */
+  let watcher = vm._watchersComputed[key]
+  /** 用户取值是会执行此方法 */
+  return function () {
+    if (watcher) {
+      /** 如果dirty 是false的话 不需要重新执行计算属性中的方法 */
+      if (watcher.dirty) {
+        /** 如果页面取值 ，而且dirty是true 就会去调用watcher的get方法 */
+        watcher.evaluate()
+      }
+      /**  watcher 就是计算属性watcher dep = [firstName.dep,lastName.Dep] */
+      if (Dep.target) {
+        watcher.depend()
+      }
+      return watcher.value
+    }
+  }
 }
-function initWatch () {
+// watch方法 不能用在模板里，监控的逻辑都放在watch中即可
+// watcher 三类 渲染watcher  用户watcher  计算属性watcher
+function initComputed (vm, computed) {
+  /**
+  * 将计算属性的配置 放到vm上
+  * 创建存储计算属性的watcher的对象
+  */
+  let watchers = vm._watchersComputed = Object.create(null) //
 
+  /** {fullName:()=>this.firstName+this.lastName} */
+  for (let key in computed) {
+    let userDef = computed[key]
+    /**
+    * new Watcher此时什么都不会做 配置了lazy dirty = true
+    * 计算属性watcher 默认刚开始这个方法不会执行
+    */
+    watchers[key] = new Watcher(vm, userDef, () => {}, { lazy: true })
+    // vm.fullName
+    Object.defineProperty(vm, key, {
+      /** 将这个属性 定义到vm上 */
+      get: createComputedGetter(vm, key)
+    })
+  }
+}
+
+function createWatcher (vm, key, handler, opts) {
+  /** 内部最终也会使用$watch方法 */
+  return vm.$watch(key, handler, opts)
+}
+
+function initWatch (vm) {
+  /** 获取用户传入的watch属性 */
+  let watch = vm.$options.watch
+  /** msg(){} */
+  for (let key in watch) {
+    let userDef = watch[key]
+    let handler = userDef
+    if (userDef.handler) {
+      handler = userDef.handler
+    }
+    createWatcher(vm, key, handler, { immediate: userDef.immediate })
+  }
 }

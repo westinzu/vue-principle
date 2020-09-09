@@ -8,10 +8,10 @@ export function compiler (node, vm) {
    * 将类数组转化成数组 */
   [...childNodes].forEach(child => {
     /** 1 元素 3表示文本 */
-    if (child.nodeType == 1) {
+    if (child.nodeType === 1) {
       /** 编译当前元素的孩子节点 */
       compiler(child, vm)
-    } else if (child.nodeType == 3) {
+    } else if (child.nodeType === 3) {
       util.compilerText(child, vm)
     }
   })
