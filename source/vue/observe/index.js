@@ -1,14 +1,12 @@
 /**
- * ? 个文件形成一个闭环1 */
+ * ? 文件形成一个闭环1 */
 import Observer from './observer'
-import Watcher from './watcher'
-import Dep from './dep'
 /** 1.挟持 data computed watch 进行具体修改 */
 export function initState (vm) {
   /** 拿到新的入参实例 */
   let opts = vm.$options
   if (opts.data) {
-    /** ?? */
+    /** 赋予读写方法 */
     initData(vm)
   }
   /** 如计算属性: 执行拦截的computed */
@@ -27,7 +25,7 @@ export function observe (data) {
     /** 只对对象或者是null 执行 */
     return
   }
-  /** 抽出观察函数执行内容 */
+  /** 打包观察函数执行内容 */
   return new Observer(data)
 }
 
@@ -44,16 +42,19 @@ function proxy (vm, source, key) {
   })
 }
 
-/** 初始化initData, 赋予读写方法 */
+/** 初始化, 赋予读写方法 */
 function initData (vm) {
-  /** 拿到用户传入的data */
-  let data = vm.$options.data
-  /** 如data是函数,通过call拿到this的属性 */
-  data = vm._data = typeof data === 'function' ? data.call(vm) : data || {}
-  /** 1.拿到data的属性, 代理其读写方法 */
-  for (let key in data) {
+  console.info('要查看的data0', vm._data)
+  /** 引用同一个 内存地址 */
+  vm._data = typeof vm.$options.data === 'function' ? vm.$options.data.call(vm) : vm.$options.data || {}
+  console.info('要查看的data1', vm._data)
+  /** 1.代理 读写方法 */
+  for (let key in vm._data) {
+    /**  */
     proxy(vm, '_data', key)
   }
+  console.info('要查看的data3', vm._data)
+
   /** 2. 观察数据 */
   observe(vm._data)
 }
@@ -73,9 +74,9 @@ function createComputedGetter (vm, key) {
         watcher.evaluate()
       }
       /**  watcher 就是计算属性watcher dep = [firstName.dep,lastName.Dep] */
-      if (Dep.target) {
-        watcher.depend()
-      }
+      // if (Dep.target) {
+      //   watcher.depend()
+      // }
       return watcher.value
     }
   }
@@ -87,16 +88,16 @@ function initComputed (vm, computed) {
   * 将计算属性的配置 放到vm上
   * 创建存储计算属性的watcher的对象
   */
-  let watchers = vm._watchersComputed = Object.create(null) //
+  // let watchers = vm._watchersComputed = Object.create(null) //
 
   /** {fullName:()=>this.firstName+this.lastName} */
   for (let key in computed) {
-    let userDef = computed[key]
+    // let userDef = computed[key]
     /**
     * new Watcher此时什么都不会做 配置了lazy dirty = true
     * 计算属性watcher 默认刚开始这个方法不会执行
     */
-    watchers[key] = new Watcher(vm, userDef, () => {}, { lazy: true })
+    // watchers[key] = new Watcher(vm, userDef, () => {}, { lazy: true })
     // vm.fullName
     Object.defineProperty(vm, key, {
       /** 将这个属性 定义到vm上 */
@@ -105,21 +106,21 @@ function initComputed (vm, computed) {
   }
 }
 
-function createWatcher (vm, key, handler, opts) {
-  /** 内部最终也会使用$watch方法 */
-  return vm.$watch(key, handler, opts)
-}
+// function createWatcher (vm, key, handler, opts) {
+//   /** 内部最终也会使用$watch方法 */
+//   return vm.$watch(key, handler, opts)
+// }
 
 function initWatch (vm) {
-  /** 获取用户传入的watch属性 */
-  let watch = vm.$options.watch
-  /** msg(){} */
-  for (let key in watch) {
-    let userDef = watch[key]
-    let handler = userDef
-    if (userDef.handler) {
-      handler = userDef.handler
-    }
-    createWatcher(vm, key, handler, { immediate: userDef.immediate })
-  }
+  // /** 获取用户传入的watch属性 */
+  // let watch = vm.$options.watch
+  // /** msg(){} */
+  // for (let key in watch) {
+  //   let userDef = watch[key]
+  //   let handler = userDef
+  //   if (userDef.handler) {
+  //     handler = userDef.handler
+  //   }
+  //   createWatcher(vm, key, handler, { immediate: userDef.immediate })
+  // }
 }

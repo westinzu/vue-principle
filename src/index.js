@@ -21,5 +21,8 @@ let vm = new Vue({
 
   }
 })
-// vm.msg = vm._data.msg // 代理
-console.log(vm.school)
+/**
+  * vm.msg === vm._data.msg
+  * 通过代理,我们可以简化调用方式
+*/
+console.log(vm.msg)
