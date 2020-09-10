@@ -9,7 +9,7 @@ import { arrayMethods, observerArray } from './array'
  *  */
 export function defineReactive (data, key, value) { //
   /**
-   * 如果value 依旧是一个对象的话 需要深度观察 {school:{name:'zf,age:10}}
+   * !如果value 依旧是一个对象的话 需要深度观察 {school:{name:'zf,age:10}}
    * 递归观察
    * 3.提取观察的方法
    */
@@ -37,7 +37,7 @@ export function defineReactive (data, key, value) { //
     /** 通知依赖更新 */
     set (newValue) {
       if (newValue === value) return
-      /** 如果你设置的值是一个对象的话 应该在进行监控这个新增的对象 */
+      /** 如果你设置的值是一个新增对象的话 应该在进行监控这个新增的对象 */
       observe(newValue)
       value = newValue
       // dep.notify()
@@ -53,13 +53,14 @@ class Observer {
     */
     if (Array.isArray(data)) {
       /**
-       * 只能拦截数组的方法 ，数组里的每一项 还需要去观测一下
+       * 原型通过定义好的 变量找
        * 让数组 通过链来查找我们自己编写的原型
        * vm._data
        */
+      /** 只能拦截数组的方法, 数组里的每一项 还需要去观察一下 */
       // eslint-disable-next-line no-proto
       data.__proto__ = arrayMethods
-      /** 观测数据中的每一项 */
+      /** 观测数组中的每一项 */
       observerArray(data)
     } else {
       /** 如非数组 */
